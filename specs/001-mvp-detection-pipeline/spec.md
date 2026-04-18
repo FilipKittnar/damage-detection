@@ -139,7 +139,7 @@ system, and verifying that annotated output frames appear in the local output bu
 - **FR-005**: The system MUST save all annotated output frames to the designated S3 output path under the same job identifier as the input.
 - **FR-006**: The system MUST persist a job record to DynamoDB containing: job ID, input path, output path, status, timestamps, frame count, damage detection count, and blurring count.
 - **FR-007**: The system MUST update the job record status as processing progresses through each pipeline stage (pending → processing → completed or failed).
-- **FR-008**: The system MUST emit domain events for each significant state change using a CQRS/Event Sourcing pattern (Axon Framework command/event skeleton).
+- **FR-008**: The system MUST publish a structured JSON domain event to a dedicated output SQS queue for each significant pipeline state change. Full CQRS/Event Sourcing implementation is the responsibility of an external downstream module outside this project's scope. As a POC verification mechanism, every outbound event MUST also be written as a JSON file to `s3://<bucket>/events/<job-id>/` so correctness can be confirmed by inspection.
 - **FR-009**: The entire pipeline MUST be runnable locally using Docker Compose and a local AWS emulator, without connecting to live AWS.
 - **FR-010**: If the licence plate blurring service is unavailable or returns an error, the pipeline MUST fail the job rather than produce output with visible licence plates.
 - **FR-011**: The pipeline MUST be idempotent with respect to job ID. If a completed job record already exists for a given job ID when an SQS message is consumed, the message MUST be discarded and the skip MUST be logged. No reprocessing occurs.
@@ -174,6 +174,7 @@ system, and verifying that annotated output frames appear in the local output bu
 - S3 object-created events are delivered directly from S3 to an SQS queue (no SNS fanout). This application polls or reacts to that SQS queue as its pipeline entry point.
 - Job ID is derived from the S3 object key by stripping the `/input/` prefix (e.g. S3 key `input/fleet/vehicle-42/clip.mp4` → job ID `fleet/vehicle-42/clip.mp4`). The output path is constructed as `output/<job-id>/`.
 - There is no authentication or authorisation layer in the POC — the pipeline is triggered purely by S3 events.
-- DynamoDB is used as both the queryable metadata store and the Axon event store for the POC.
+- DynamoDB is used as the queryable job metadata store. There is no Axon event store in this application; full event sourcing is the responsibility of an external downstream module.
+- This application is Python-only. No Java or Kotlin components are in scope.
 - The pipeline is designed for sequential single-job processing in the POC; parallel multi-job processing is a future concern.
 - Output frames are saved as JPEG or PNG images; video reconstruction from frames is out of scope.

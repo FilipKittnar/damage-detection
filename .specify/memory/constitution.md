@@ -1,16 +1,23 @@
 <!--
   Sync Impact Report
   ==================
-  Version change: N/A (initial) → 1.0.0
-  Added sections: Core Principles (I–V), Technology Stack, Development Workflow, Governance
-  Removed sections: N/A — initial constitution
+  Version change: 1.0.0 → 1.1.0
+  Modified principles:
+    - III. Event-Driven, S3-Triggered Pipeline — removed Axon Framework responsibility;
+      this application publishes domain events to an output SQS queue consumed by an
+      external downstream module. Axon/CQRS implementation is out of scope.
+  Added sections: None
+  Removed sections: None
+  Technology Stack changes:
+    - Removed: Java/Kotlin runtime, Axon Framework
+    - Added: Python-only runtime, YOLOv8 (damage detection + licence plate detection),
+      FastAPI (blurring service), OpenCV, boto3
+    - Updated: event output mechanism (SQS output queue + S3 event dump for POC)
   Templates reviewed:
-    ✅ .specify/templates/plan-template.md — Constitution Check section is generic; compatible
-    ✅ .specify/templates/spec-template.md — No conflicts; licence-plate privacy applies as
-       a mandatory cross-cutting FR in every feature spec
-    ✅ .specify/templates/tasks-template.md — TDD gate already present; aligns with
-       Test-First principle; no changes required
-  Follow-up TODOs: None — all placeholders resolved
+    ✅ .specify/templates/plan-template.md — compatible
+    ✅ .specify/templates/spec-template.md — compatible
+    ✅ .specify/templates/tasks-template.md — compatible
+  Follow-up TODOs: None
 -->
 
 # Damage Detection Constitution
@@ -32,11 +39,13 @@ considered valid unless the blurring step has been confirmed complete. This rule
 all environments, including local development and test runs.
 
 ### III. Event-Driven, S3-Triggered Pipeline
-Processing MUST be triggered exclusively by S3 object-created events — polling is forbidden.
-Intermediate and final results MUST be persisted to designated S3 output paths. All queryable
-metadata MUST be stored in DynamoDB. All domain state changes MUST be captured as immutable
-domain events following CQRS and Event Sourcing patterns. Axon Framework is the preferred
-implementation for event sourcing and command handling where the runtime supports it.
+Processing MUST be triggered exclusively by S3 object-created events delivered via SQS —
+polling is forbidden. Intermediate and final results MUST be persisted to designated S3
+output paths. All queryable metadata MUST be stored in DynamoDB. All significant domain
+state changes MUST be published as structured JSON events to a dedicated output SQS queue,
+which is consumed by an external downstream module outside this project's scope. CQRS and
+full event sourcing implementation are the responsibility of that external module, not this
+application.
 
 ### IV. Test-First Development (NON-NEGOTIABLE)
 TDD is mandatory. Tests MUST be written and reviewed before any implementation code is
@@ -52,23 +61,33 @@ debug the full pipeline end-to-end on a local machine.
 
 ## Technology Stack
 
-**Runtime languages**: Python (ML/CV services), Java or Kotlin (Axon-based orchestration
-and event sourcing services). The monorepo is intentionally polyglot.
+**Runtime language**: Python 3.11+ throughout. This is a Python-only application.
 
-**ML / Computer Vision**: PyTorch (primary); ONNX-compatible model interfaces for
-portability. A separate, independently deployable service handles licence plate detection
-and blurring.
+**ML / Computer Vision**:
+- Damage detection: YOLOv8 (Ultralytics); ONNX-compatible model interface for portability
+  and future fine-tuning with Renault-specific data.
+- Licence plate detection and blurring: YOLOv8 (pre-trained licence plate model) +
+  OpenCV Gaussian blur; runs as a separate independently deployable service.
+- Frame extraction: OpenCV (cv2).
 
-**AWS services**: S3 (video input and processed output artefacts), DynamoDB (event store
-and queryable metadata), SNS/SQS (event routing between microservices).
+**AWS services**: S3 (video input and processed output artefacts, domain event dump for
+POC), DynamoDB (job metadata store), SQS (input trigger queue, domain event output queue).
 
-**CQRS / Event Sourcing**: Axon Framework (Java/Kotlin services).
+**Domain event output**: This application publishes domain events as structured JSON
+messages to an output SQS queue. The downstream consumer of that queue is outside this
+project's scope. As a POC verification mechanism, all outbound events are additionally
+written to S3 as JSON files (`s3://<bucket>/events/<job-id>/<event-type>-<timestamp>.json`)
+for manual inspection.
+
+**Service HTTP layer**: FastAPI (licence plate blurring service internal API).
+
+**AWS SDK**: boto3.
 
 **Local development**: Localstack (AWS emulation), Docker Compose (full-stack local
 orchestration).
 
-**Repository structure**: Monorepo. Each microservice is independently deployable.
-No API Gateways and no Lambda functions.
+**Repository structure**: Monorepo. Two independently deployable Python services:
+Pipeline Service and Licence Plate Blurring Service. No API Gateways, no Lambda functions.
 
 ## Development Workflow
 
@@ -98,4 +117,4 @@ a documented rationale, a semantic version increment, and an updated `Last Amend
 All implementation work MUST be verified against this constitution before merge. Added
 complexity MUST be justified; YAGNI applies throughout the POC phase.
 
-**Version**: 1.0.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18
+**Version**: 1.1.0 | **Ratified**: 2026-04-18 | **Last Amended**: 2026-04-18
