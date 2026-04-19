@@ -1,4 +1,4 @@
-# damage-detection
+# Damage Detection
 
 An event-driven pipeline that automatically detects vehicle damage in inspection videos and blurs all licence plates in the output. Triggered by S3 object-created events, it extracts frames, runs YOLOv8 damage detection, calls a plate-blurring service, and writes annotated frames plus job metadata back to AWS storage.
 

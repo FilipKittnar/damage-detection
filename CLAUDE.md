@@ -26,4 +26,9 @@ Python 3.11+: Follow standard conventions
 - 001-mvp-detection-pipeline: Added Python 3.11+
 
 <!-- MANUAL ADDITIONS START -->
+
+## Documentation
+
+Developer docs live in [docs/](docs/). Follow the maintenance rules in [.claude/docs-maintenance.md](.claude/docs-maintenance.md) — keep docs updated when architecture, dependencies, setup, or tests change, and resist scope creep.
+
 <!-- MANUAL ADDITIONS END -->
