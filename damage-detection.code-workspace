@@ -76,10 +76,9 @@
       "ms-python.python",
       "ms-python.vscode-pylance",
       "charliermarsh.ruff",
-      "ms-azuretools.vscode-docker",
+      "ms-azuretools.vscode-containers",
       "redhat.vscode-yaml",
-      "tamasfe.even-better-toml",
-      "eamodio.gitlens"
+      "tamasfe.even-better-toml"
     ]
   },
   "launch": {
