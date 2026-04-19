@@ -1,0 +1,152 @@
+{
+  "folders": [
+    {
+      "name": "🏠 damage-detection",
+      "path": "."
+    },
+    {
+      "name": "🔧 pipeline",
+      "path": "services/pipeline"
+    },
+    {
+      "name": "🚗 plate-blurring",
+      "path": "services/plate-blurring"
+    },
+    {
+      "name": "🏗️ infra",
+      "path": "infra"
+    },
+    {
+      "name": "📚 docs",
+      "path": "docs"
+    },
+    {
+      "name": "📋 specs",
+      "path": "specs"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/__pycache__": true,
+      "**/.pytest_cache": true,
+      "**/.ruff_cache": true,
+      "**/.mypy_cache": true,
+      "**/*.egg-info": true,
+      "**/.venv": true
+    },
+    "files.watcherExclude": {
+      "**/__pycache__/**": true,
+      "**/.venv/**": true,
+      "**/.pytest_cache/**": true,
+      "**/.ruff_cache/**": true
+    },
+    "search.exclude": {
+      "**/.venv": true,
+      "**/__pycache__": true,
+      "**/*.egg-info": true
+    },
+    "editor.formatOnSave": true,
+    "editor.rulers": [100],
+    "editor.insertSpaces": true,
+    "editor.tabSize": 4,
+    "files.insertFinalNewline": true,
+    "files.trimTrailingWhitespace": true,
+    "[python]": {
+      "editor.defaultFormatter": "charliermarsh.ruff",
+      "editor.codeActionsOnSave": {
+        "source.organizeImports.ruff": "explicit",
+        "source.fixAll.ruff": "explicit"
+      }
+    },
+    "python.analysis.typeCheckingMode": "basic",
+    "python.analysis.autoImportCompletions": true,
+    "python.testing.pytestEnabled": true,
+    "python.testing.unittestEnabled": false,
+    "ruff.enable": true,
+    "ruff.lint.enable": true,
+    "yaml.schemas": {
+      "https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json": [
+        "docker-compose.yml",
+        "docker-compose.*.yml"
+      ]
+    }
+  },
+  "extensions": {
+    "recommendations": [
+      "ms-python.python",
+      "ms-python.vscode-pylance",
+      "charliermarsh.ruff",
+      "ms-azuretools.vscode-docker",
+      "redhat.vscode-yaml",
+      "tamasfe.even-better-toml",
+      "eamodio.gitlens"
+    ]
+  },
+  "launch": {
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Pytest: pipeline",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "pytest",
+        "cwd": "${workspaceFolder:pipeline}",
+        "args": ["-v"],
+        "console": "integratedTerminal",
+        "justMyCode": false
+      },
+      {
+        "name": "Pytest: plate-blurring",
+        "type": "debugpy",
+        "request": "launch",
+        "module": "pytest",
+        "cwd": "${workspaceFolder:plate-blurring}",
+        "args": ["-v"],
+        "console": "integratedTerminal",
+        "justMyCode": false
+      }
+    ]
+  },
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "docker: compose up",
+        "type": "shell",
+        "command": "docker compose up -d",
+        "options": {"cwd": "${workspaceFolder:damage-detection}"},
+        "problemMatcher": []
+      },
+      {
+        "label": "docker: compose down",
+        "type": "shell",
+        "command": "docker compose down",
+        "options": {"cwd": "${workspaceFolder:damage-detection}"},
+        "problemMatcher": []
+      },
+      {
+        "label": "test: pipeline",
+        "type": "shell",
+        "command": "pytest",
+        "options": {"cwd": "${workspaceFolder:pipeline}"},
+        "group": "test",
+        "problemMatcher": []
+      },
+      {
+        "label": "test: plate-blurring",
+        "type": "shell",
+        "command": "pytest",
+        "options": {"cwd": "${workspaceFolder:plate-blurring}"},
+        "group": "test",
+        "problemMatcher": []
+      },
+      {
+        "label": "lint: all",
+        "type": "shell",
+        "command": "ruff check services",
+        "options": {"cwd": "${workspaceFolder:damage-detection}"},
+        "problemMatcher": []
+      }
+    ]
+  }
+}
