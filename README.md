@@ -20,3 +20,9 @@ specs/               # Feature specs (Spec Kit)
 docs/                # Developer documentation (you are here)
 docker-compose.yml   # Full local stack
 ```
+
+## Development workflow
+
+This project follows [GitHub Spec Kit](https://github.com/github/spec-kit): features are specified, planned, broken into tasks, and implemented through a defined sequence of artifacts before any code is written. Each feature lives in its own folder under `specs/` containing `spec.md`, `plan.md`, `tasks.md`, and supporting design docs.
+
+The workflow is driven by slash commands (`/speckit-specify`, `/speckit-clarify`, `/speckit-plan`, `/speckit-tasks`, `/speckit-implement`, `/speckit-analyze`). Before starting a new feature, read the existing `specs/001-mvp-detection-pipeline/` artifacts to see the expected level of detail.
